@@ -1,11 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="f63420f5-b944-46e1-b21a-b6d4e9e84ff3" name="Changes" comment="" />
+    <list default="true" id="f63420f5-b944-46e1-b21a-b6d4e9e84ff3" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/messenger/management/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/messenger/management/commands/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/messenger/management/commands/send_message.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/messenger/templates/messenger/base_generic.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/messenger/templates/messenger/home_page.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/messenger/urls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/css/bootstrap.min.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/js/bootstrap.bundle.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/users/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+        <option value="HTML File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -21,10 +45,19 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master"
+    "git-widget-placeholder": "feature/task-1",
+    "last_opened_file_path": "C:/Users/Lenovo/Mailing-Service/static/js"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Lenovo\Mailing-Service\static\js" />
+      <recent name="C:\Users\Lenovo\Mailing-Service\static\css" />
+      <recent name="C:\Users\Lenovo\Mailing-Service" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
