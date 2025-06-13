@@ -43,6 +43,13 @@ class Message(models.Model):
         null=True,
         blank=True
     )
+    recipient_email = models.EmailField(
+        verbose_name='Почтовый адрес получателя',
+        help_text='Введите почтовый адрес получателя',
+        null=True,
+        blank=True
+    )
+    is_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return self.topic

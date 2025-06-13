@@ -52,6 +52,9 @@ TEMPLATES = [
     },
 ]
 
+FILE_CHARSET = 'utf-8'
+DEFAULT_CHARSET = 'utf-8'
+
 
 WSGI_APPLICATION = 'config.wsgi.application'
 

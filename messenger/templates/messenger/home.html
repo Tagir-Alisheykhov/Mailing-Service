@@ -1,0 +1,86 @@
+{% extends 'messenger/base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+  <p>Сервис Email-рассылок</p>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3">Панель управления рассылками</h1>
+    <a href="#" class="btn btn-outline-primary">Все рассылки</a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Общее количество рассылок -->
+    <div class="col-md-4">
+      <div class="card border-start border-primary border-5 shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-muted">Всего рассылок</h5>
+          <p class="card-text display-6 fw-bold">{{ total_campaigns }}</p>
+        </div>
+        <a href="#" class="stretched-link"></a>
+      </div>
+    </div>
+
+    <!-- Активные рассылки -->
+    <div class="col-md-4">
+      <div class="card border-start border-success border-5 shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-muted">Активные рассылки</h5>
+          <p class="card-text display-6 fw-bold">{{ active_campaigns }}</p>
+        </div>
+        <a href="#" class="stretched-link"></a>
+      </div>
+    </div>
+
+    <!-- Уникальные получатели -->
+    <div class="col-md-4">
+      <div class="card border-start border-info border-5 shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-muted">Уникальных получателей</h5>
+          <p class="card-text display-6 fw-bold">{{ unique_recipients }}</p>
+        </div>
+        <a href="#" class="stretched-link"></a>
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-5">
+
+<!--  &lt;!&ndash; Таблица последних рассылок &ndash;&gt;-->
+<!--  <h2 class="h4 mb-3">Недавние рассылки</h2>-->
+<!--  {% if latest_campaigns %}-->
+<!--    <div class="table-responsive">-->
+<!--      <table class="table table-hover align-middle">-->
+<!--        <thead class="table-light">-->
+<!--          <tr>-->
+<!--            <th scope="col">Название</th>-->
+<!--            <th scope="col">Дата создания</th>-->
+<!--            <th scope="col">Статус</th>-->
+<!--            <th scope="col">Количество получателей</th>-->
+<!--          </tr>-->
+<!--        </thead>-->
+<!--        <tbody>-->
+<!--          {% for campaign in latest_campaigns %}-->
+<!--            <tr>-->
+<!--              <td>{{ campaign.name }}</td>-->
+<!--              <td>{{ campaign.created_at|date:"d.m.Y H:i" }}</td>-->
+<!--              <td>-->
+<!--                {% if campaign.status == 'Запущена' %}-->
+<!--                  <span class="badge bg-success">{{ campaign.status }}</span>-->
+<!--                {% elif campaign.status == 'Остановлена' %}-->
+<!--                  <span class="badge bg-secondary">{{ campaign.status }}</span>-->
+<!--                {% else %}-->
+<!--                  <span class="badge bg-warning text-dark">{{ campaign.status }}</span>-->
+<!--                {% endif %}-->
+<!--              </td>-->
+<!--              <td>{{ campaign.recipients.count }}</td>-->
+<!--            </tr>-->
+<!--          {% endfor %}-->
+<!--        </tbody>-->
+<!--      </table>-->
+<!--    </div>-->
+<!--  {% else %}-->
+<!--    <p>Нет недавних рассылок.</p>-->
+<!--  {% endif %}-->
+</div>
+{% endblock %}
