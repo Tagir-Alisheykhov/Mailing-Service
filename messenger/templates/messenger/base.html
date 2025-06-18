@@ -23,7 +23,7 @@
 
   <!-- Навигационная панель -->
 
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm px-3">
     <div class="container-fluid">
       <a class="navbar-brand" href="{% url 'messenger:home' %}">OpusMail</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -36,7 +36,7 @@
             <a class="nav-link" href="{% url 'messenger:home' %}">Главная</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Рассылки</a>
+            <a class="nav-link" href="{% url 'messenger:mailing_list' %}">Рассылки</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Получатели</a>
@@ -49,11 +49,11 @@
     </div>
   </nav>
 
-  <!-- Основное содержимое страницы -->
-  <div class="container-fluid px-4">
+
+<div class="container-fluid px-4" style="{% if request.path == '/' or 'home' in request.path %}background: linear-gradient(135deg, #ffcccb 0%, #ffebee 100%){% else %}background: #ffffff{% endif %}">
     {% block content %}
     {% endblock %}
-  </div>
+</div>
 
   <!-- Footer -->
   <footer class="bg-light py-4 mt-5 border-top">

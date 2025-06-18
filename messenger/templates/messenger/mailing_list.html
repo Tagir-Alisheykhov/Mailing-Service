@@ -1,0 +1,80 @@
+{% extends 'messenger/base.html' %}
+{% load static %}
+
+{% block title %}
+    Список рассылок
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <p class="pt-3 px-2">Управление рассылками</p>
+  <div class="d-flex justify-content-between align-items-center px-2 pb-2">
+    <h1 class="h3">Рассылки</h1>
+    <a href="{% url 'messenger:mailing_create' %}" class="btn btn-primary">Создать + </a>
+  </div>
+
+  <hr class="my-4">
+
+  <!-- Фильтр по статусу -->
+    <div class="mb-3">
+        <label class="form-label">Фильтрация по статусу</label><br>
+        <div class="btn-group" role="group">
+            <a href="{% url 'messenger:mailing_list' %}"
+               class="btn btn-outline-secondary {% if current_filter == 'all' %}active{% endif %}">
+                Все
+            </a>
+            <a href="{% url 'messenger:mailing_created' %}"
+               class="btn btn-outline-secondary {% if current_filter == 'created' %}active{% endif %}">
+                Созданные
+            </a>
+            <a href="{% url 'messenger:mailing_running' %}"
+               class="btn btn-outline-secondary {% if current_filter == 'running' %}active{% endif %}">
+                Запущенные
+            </a>
+            <a href="{% url 'messenger:mailing_completed' %}"
+               class="btn btn-outline-secondary {% if current_filter == 'completed' %}active{% endif %}">
+                Завершенные
+            </a>
+        </div>
+    </div>
+  <br>
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for mailing in mailings %}
+      <div class="col">
+        <div class="card shadow-sm h-100 {% if mailing.end_datetime < now_datetime %}border-danger{% endif %}">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-primary">{{ mailing }}</h5>
+            <p class="card-text text-muted small">
+              Начало: {{ mailing.start_datetime|date:"d.m.Y H:i" }}<br>
+              Окончание: {{ mailing.end_datetime|date:"d.m.Y H:i" }}<br>
+              Тема: {{ mailing.message.topic|default:"—" }}<br>
+              Получатели: {{ mailing.recipients.count }}<br>
+              Статус: {{ mailing.get_mailing_status_display|lower }}
+            </p>
+            <div class="mt-auto d-flex justify-content-between">
+              <span class="badge bg-{{ mailing.get_mailing_status_display|lower }}">
+                {% if mailing.mailing_status == 'created' %}
+                  создана
+                {% elif mailing.mailing_status == 'running' %}
+                  запущена
+                {% elif mailing.mailing_status == 'completed' %}
+                  завершена
+                {% endif %}
+              </span>
+              <div>
+                <a href="{% url 'messenger:mailing_detail' mailing.pk %}" class="btn btn-sm btn-outline-info">Просмотр</a>
+                <a href="{% url 'messenger:mailing_update' mailing.pk %}" class="btn btn-sm btn-outline-info">Изменить</a>
+                <a href="{% url 'messenger:mailing_delete' mailing.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col">
+        <div class="alert alert-info">Пусто</div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

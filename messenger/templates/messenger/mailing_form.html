@@ -1,0 +1,26 @@
+{% extends 'messenger/base.html' %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
+        <h2>{{ view.title }}</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            {% if object %}
+                <button type="submit" class="btn btn-warning">Сохранить</button>
+            {% else %}
+                <button type="submit" class="btn btn-warning">Создать</button>
+            {% endif %}
+        </form>
+        <a href="{% if object.mailing_status == 'created' %}{% url 'messenger:mailing_created' %}{% elif object.mailing_status == 'running' %}{% url 'messenger:mailing_running' %}{% elif object.mailing_status == 'completed' %}{% url 'messenger:mailing_completed' %}{% else %}{% url 'messenger:mailing_list' %}{% endif %}">
+            <button type="submit" class="btn btn-secondary mt-2">Назад</button>
+        </a>
+
+    </div>
+    <div class="col-2"></div>
+</div>
+
+{% endblock %}

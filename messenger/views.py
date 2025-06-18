@@ -1,4 +1,6 @@
 import os
+
+from django.utils import timezone
 from dotenv import load_dotenv
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -12,9 +14,9 @@ from django.views.generic.edit import (
     DeleteView,
 )
 
-from .forms import MessageForm
-from .models import Message
-from .services import the_logic_of_sending_a_msg
+from .forms import MessageForm, MailingForm
+from .models import Message, Mailing, Recipient
+from .services import sending_msg, get_mailing_from_cache, get_recipients_from_cache
 
 load_dotenv()
 
@@ -28,11 +30,16 @@ class HomePageView(TemplateView):
 
     def get_context_data(self,  *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
+        cache_mailings = get_mailing_from_cache()
+        cache_recipients = get_recipients_from_cache().count()
+        total_campaigns = cache_mailings.count()
+        active_campaigns = cache_mailings.filter(mailing_status='running').count()
+        unique_recipients = ''
         context.update(
             {
-                'total_campaigns': 127,
-                'active_campaigns': 9,
-                'unique_recipients': 48362
+                'total_campaigns': total_campaigns,
+                'active_campaigns': active_campaigns,
+                'unique_recipients': cache_recipients
             }
         )
         return context
@@ -53,6 +60,7 @@ class MessageDraftView(ListView):
         context = super().get_context_data(**kwargs)
         context['context_name'] = 'Черновик'
         context['all_messages'] = Message.objects.all().filter(is_sent=False)
+        context['is_draft_page'] = True
         return context
 
 
@@ -71,6 +79,7 @@ class MessageSentView(ListView):
         context = super().get_context_data(**kwargs)
         context['context_name'] = 'Отправленные сообщения'
         context['all_messages'] = Message.objects.all().filter(is_sent=True)
+        context['is_sent_page'] = True
         return context
 
 
@@ -89,7 +98,7 @@ class MessageCreateView(CreateView):
         """
         self.object = form.save()
         if self.object.is_sent:
-            result = the_logic_of_sending_a_msg(
+            result = sending_msg(
                 sender_email=SENDER,
                 recipient_email=[self.object.recipient_email],
                 subject=self.object.topic,
@@ -125,3 +134,130 @@ class MessageDeleteView(DeleteView):
     model = Message
     template_name = 'messenger/msg_delete.html'
     success_url = reverse_lazy('messenger:draft_msg')
+
+
+class MailingListView(ListView):
+    """Список всех рассылок"""
+    model = Mailing
+    template_name = 'messenger/mailing_list.html'
+    context_object_name = 'mailings'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_filter'] = 'all'
+        return context
+
+
+class MailingCreatedView(ListView):
+    """Отображение рассылок по категории 'Создана'"""
+    model = Mailing
+    template_name = 'messenger/mailing_list.html'
+    context_object_name = 'mailings'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(mailing_status='created')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_filter'] = 'created'
+        return context
+
+
+class MailingRunningView(ListView):
+    """Отображение рассылок по категории 'Запущено'"""
+    model = Mailing
+    template_name = 'messenger/mailing_list.html'
+    context_object_name = 'mailings'
+
+    def get_queryset(self):
+        now = timezone.now()
+        Mailing.objects.filter(
+            mailing_status='running',
+            end_datetime__lt=now
+        ).update(mailing_status='completed')
+        return super().get_queryset().filter(mailing_status='running')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_filter'] = 'running'
+        context['now_datetime'] = timezone.now()
+        return context
+
+
+class MailingCompletedView(ListView):
+    """Отображение рассылок по категории 'Завершено'"""
+    model = Mailing
+    template_name = 'messenger/mailing_list.html'
+    context_object_name = 'mailings'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(mailing_status='completed')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_filter'] = 'completed'
+        return context
+
+
+class MailingCreateView(CreateView):
+    """Создание объекта рассылки"""
+    model = Mailing
+    form_class = MailingForm
+    template_name = 'messenger/mailing_form.html'
+    success_url = reverse_lazy('messenger:mailing_created')
+
+
+class MailingDetailView(DetailView):
+    """Детальная информация о рассылке"""
+    model = Mailing
+    template_name = 'messenger/mailing_detail.html'
+
+
+class MailingUpdateView(UpdateView):
+    """Обновление информации в объекте рассылки"""
+    model = Mailing
+    form_class = MailingForm
+    template_name = 'messenger/mailing_form.html'
+    success_url = reverse_lazy('messenger:mailing_created')
+
+
+class MailingDeleteView(DeleteView):
+    """Удаление объекта рассылки"""
+    model = Mailing
+    template_name = 'messenger/mailing_delete.html'
+    success_url = reverse_lazy('messenger:mailing_list')
+
+
+class RecipientListView(ListView):
+    """Список получателей"""
+    model = Recipient
+    template_name = 'messenger/recipient_list.html'
+    context_object_name = 'recipients'
+
+
+class RecipientCreateView(CreateView):
+    """Создание получателя"""
+    model = Recipient
+    template_name = 'messenger/recipient_form.html'
+    success_url = reverse_lazy('messenger:recipients_list')
+
+
+class RecipientUpdateView(UpdateView):
+    """Редактирование получателя"""
+    model = Recipient
+    template_name = 'messenger/recipient_form.html'
+    success_url = reverse_lazy('messenger:recipients_list')
+
+
+class RecipientDetailView(DetailView):
+    """Детальная информация о получателе"""
+    model = Recipient
+    template_name = 'messenger/recipient_detail.html'
+
+
+class RecipientDeleteView(DeleteView):
+    """Удаление получателя"""
+    model = Recipient
+    template_name = 'messenger/recipient_delete.html'
+
+

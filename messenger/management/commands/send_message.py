@@ -10,6 +10,7 @@ SENDER = os.getenv('EMAIL_HOST_USER')
 
 
 class Command(BaseCommand):
+    """Ручная отправка сообщений на почту"""
     help = 'Send messages'
 
     def handle(self, *args, **kwargs):

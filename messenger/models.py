@@ -5,6 +5,7 @@ class Recipient(models.Model):
     """Модель получателя рассылки."""
 
     email = models.EmailField(
+        unique=True,
         verbose_name='Почтовый адрес получателя',
         help_text='Введите почтовый адрес получателя'
     )

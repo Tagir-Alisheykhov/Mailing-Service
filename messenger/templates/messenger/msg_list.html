@@ -3,25 +3,24 @@
 {% block content %}
 
 <div class="container-fluid">
-  <p>Ручная отправка сообщений</p>
-  <div class="d-flex justify-content-between align-items-center">
-        <h1 class="h1">{{ context_name }}</h1>
+  <p class="pt-3 px-2">Ручная отправка сообщений</p>
+  <div class="d-flex justify-content-between align-items-center px-2 pb-2">
+        <h1 class="h3">{{ context_name }}</h1>
         <a href="{% url 'messenger:create_msg' %}" class="btn btn-warning">Написать</a>
   </div>
-  <hr class="my-4">
+  <hr class="my-2">
 </div>
 
 <div class="row">
     <div class="col-4"></div>
     <div class="col-4">
         <div class="d-flex gap-3 justify-content-center align-items-center my-2">
-            {% if messages_draft %}
+            {% if is_draft_page %}
                 <a href="{% url 'messenger:sent_msg' %}" class="btn btn-success">Отправленные</a>
                 <a href="{% url 'messenger:draft_msg' %}" class="btn btn-success disabled">Черновик</a>
-            {% elif messages_sent %}
+            {% elif is_sent_page %}
                 <a href="{% url 'messenger:sent_msg' %}" class="btn btn-success disabled">Отправленные</a>
                 <a href="{% url 'messenger:draft_msg' %}" class="btn btn-success ">Черновик</a>
-
             {% endif %}
         </div>
     </div>
@@ -62,10 +61,17 @@
 <!--          <a href="#" class="stretched-link"></a>-->
         </div>
       </div>
+    {% empty %}
+      <div class="col">
+        {% if is_draft_page %}
+            <div class="alert alert-info">Черновик пуст</div>
+        {% elif is_sent_page %}
+            <div class="alert alert-info">Нет активных сообщений</div>
+        {% endif %}
+      </div>
     {% endfor %}
   </div>
 </div>
-
 {% endblock %}
 
 
