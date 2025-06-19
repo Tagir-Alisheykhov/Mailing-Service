@@ -105,6 +105,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
+AUTH_USER_MODEL = 'users.CustomUser'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
@@ -128,3 +129,4 @@ if CACHE_ENABLED:
             'LOCATION': 'redis://127.0.0.1:6379'
         }
     }
+

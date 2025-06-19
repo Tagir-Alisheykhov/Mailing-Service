@@ -16,7 +16,7 @@
       <div class="card border-start border-light border-5 shadow-sm h-100">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title text-muted">Всего рассылок</h5>
-          <p class="card-text display-6 fw-bold">{{ total_campaigns }}</p>
+          <p class="card-text display-6 fw-bold mt-auto align-self-end">{{ total_campaigns }}</p>
         </div>
         <a href="{% url 'messenger:mailing_list' %}" class="stretched-link"></a>
       </div>
@@ -27,9 +27,9 @@
       <div class="card border-start border-light border-5 shadow-sm h-100">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title text-muted">Активные рассылки</h5>
-          <p class="card-text display-6 fw-bold">{{ active_campaigns }}</p>
+          <p class="card-text display-6 fw-bold mt-auto align-self-end">{{ active_campaigns }}</p>
         </div>
-        <a href="#" class="stretched-link"></a>
+        <a href="{% url 'messenger:mailing_running' %}" class="stretched-link"></a>
       </div>
     </div>
 
@@ -38,9 +38,9 @@
       <div class="card border-start border-light border-5 shadow-sm h-100">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title text-muted">Уникальных получателей</h5>
-          <p class="card-text display-6 fw-bold">{{ unique_recipients }}</p>
+          <p class="card-text display-6 fw-bold mt-auto align-self-end">{{ unique_recipients }}</p>
         </div>
-        <a href="#" class="stretched-link"></a>
+        <a href="{% url 'messenger:recipients_list' %}" class="stretched-link"></a>
       </div>
     </div>
   </div>

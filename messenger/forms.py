@@ -1,7 +1,20 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator, validate_email
 
-from .models import Message, Mailing
+from .models import Message, Mailing, Recipient
+
+FORBIDDEN_WORDS = [
+    "казино",
+    "криптовалюта",
+    "крипта",
+    "биржа",
+    "дешево",
+    "бесплатно",
+    "обман",
+    "полиция",
+    "радар"
+]
 
 
 class MessageForm(forms.ModelForm):
@@ -89,3 +102,54 @@ class MailingForm(forms.ModelForm):
             'message',
             'recipients'
         ]
+
+
+class RecipientForm(forms.ModelForm):
+    """Форма для создания и редактирования получателей рассылок"""
+
+    # email = forms.EmailField(validators=[EmailValidator()])
+
+    def __init__(self, *args, **kwargs):
+        super(RecipientForm, self).__init__(*args, **kwargs)
+
+        for field_name in self.fields:
+            self.fields[field_name].help_text = None
+            self.fields[field_name].widget.attrs.update({
+                'class': 'form-control',
+                'placeholder': f'Введите: {self.fields[field_name].label}'
+            })
+
+    def clean_email(self):
+        """Валидация формата email"""
+        email = self.cleaned_data.get('email')
+
+        try:
+            validate_email(email)  # Стандартный валидатор Django
+        except ValidationError:
+            raise ValidationError('Введите корректный email адрес')
+
+        return email
+
+    def clean_fullname(self):
+        """Валидация поля с названием товара."""
+        name = self.cleaned_data.get("fullname")
+        for keyword in FORBIDDEN_WORDS:
+            if name.strip() == keyword.upper() or name.strip() == keyword.lower():
+                raise ValidationError(
+                    f"Слово '{name}' входит в список запрещенных слов!"
+                )
+        return name
+
+    def clean_comment(self):
+        """Валидация поля с описанием товара."""
+        comment = self.cleaned_data.get("comment")
+        for keyword in FORBIDDEN_WORDS:
+            if keyword.upper() in comment or keyword.lower() in comment:
+                raise ValidationError(
+                    f"Слово '{comment}' входит в список запрещенных слов!"
+                )
+        return comment
+
+    class Meta:
+        model = Recipient
+        fields = ['email', 'fullname', 'comment']

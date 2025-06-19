@@ -14,7 +14,7 @@ from django.views.generic.edit import (
     DeleteView,
 )
 
-from .forms import MessageForm, MailingForm
+from .forms import MessageForm, MailingForm, RecipientForm
 from .models import Message, Mailing, Recipient
 from .services import sending_msg, get_mailing_from_cache, get_recipients_from_cache
 
@@ -238,6 +238,7 @@ class RecipientListView(ListView):
 class RecipientCreateView(CreateView):
     """Создание получателя"""
     model = Recipient
+    form_class = RecipientForm
     template_name = 'messenger/recipient_form.html'
     success_url = reverse_lazy('messenger:recipients_list')
 
@@ -245,6 +246,7 @@ class RecipientCreateView(CreateView):
 class RecipientUpdateView(UpdateView):
     """Редактирование получателя"""
     model = Recipient
+    form_class = RecipientForm
     template_name = 'messenger/recipient_form.html'
     success_url = reverse_lazy('messenger:recipients_list')
 
@@ -259,5 +261,5 @@ class RecipientDeleteView(DeleteView):
     """Удаление получателя"""
     model = Recipient
     template_name = 'messenger/recipient_delete.html'
-
+    success_url = reverse_lazy('messenger:recipients_list')
 
