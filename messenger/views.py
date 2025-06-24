@@ -3,16 +3,9 @@ import os
 from django.utils import timezone
 from dotenv import load_dotenv
 from django.urls import reverse_lazy
-from django.views.generic import (
-    ListView,
-    DetailView,
-    TemplateView
-)
-from django.views.generic.edit import (
-    CreateView,
-    UpdateView,
-    DeleteView,
-)
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, DetailView, TemplateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .forms import MessageForm, MailingForm, RecipientForm
 from .models import Message, Mailing, Recipient
@@ -83,7 +76,7 @@ class MessageSentView(ListView):
         return context
 
 
-class MessageCreateView(CreateView):
+class MessageCreateView(LoginRequiredMixin, CreateView):
     """Ручное создание сообщения"""
     model = Message
     form_class = MessageForm
@@ -110,7 +103,7 @@ class MessageCreateView(CreateView):
         return super().form_valid(form)
 
 
-class MessageUpdateView(UpdateView):
+class MessageUpdateView(LoginRequiredMixin, UpdateView):
     """Изменение сообщения"""
     model = Message
     form_class = MessageForm
@@ -129,7 +122,7 @@ class MessageDetailView(DetailView):
     template_name = 'messenger/msg_detail.html'
 
 
-class MessageDeleteView(DeleteView):
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
     """Удаление сообщения"""
     model = Message
     template_name = 'messenger/msg_delete.html'
@@ -148,7 +141,7 @@ class MailingListView(ListView):
         return context
 
 
-class MailingCreatedView(ListView):
+class MailingCreatedView(LoginRequiredMixin, ListView):
     """Отображение рассылок по категории 'Создана'"""
     model = Mailing
     template_name = 'messenger/mailing_list.html'
@@ -199,7 +192,7 @@ class MailingCompletedView(ListView):
         return context
 
 
-class MailingCreateView(CreateView):
+class MailingCreateView(LoginRequiredMixin, CreateView):
     """Создание объекта рассылки"""
     model = Mailing
     form_class = MailingForm
@@ -213,7 +206,7 @@ class MailingDetailView(DetailView):
     template_name = 'messenger/mailing_detail.html'
 
 
-class MailingUpdateView(UpdateView):
+class MailingUpdateView(LoginRequiredMixin, UpdateView):
     """Обновление информации в объекте рассылки"""
     model = Mailing
     form_class = MailingForm
@@ -221,7 +214,7 @@ class MailingUpdateView(UpdateView):
     success_url = reverse_lazy('messenger:mailing_created')
 
 
-class MailingDeleteView(DeleteView):
+class MailingDeleteView(LoginRequiredMixin, DeleteView):
     """Удаление объекта рассылки"""
     model = Mailing
     template_name = 'messenger/mailing_delete.html'
@@ -235,7 +228,7 @@ class RecipientListView(ListView):
     context_object_name = 'recipients'
 
 
-class RecipientCreateView(CreateView):
+class RecipientCreateView(LoginRequiredMixin, CreateView):
     """Создание получателя"""
     model = Recipient
     form_class = RecipientForm
@@ -243,7 +236,7 @@ class RecipientCreateView(CreateView):
     success_url = reverse_lazy('messenger:recipients_list')
 
 
-class RecipientUpdateView(UpdateView):
+class RecipientUpdateView(LoginRequiredMixin, UpdateView):
     """Редактирование получателя"""
     model = Recipient
     form_class = RecipientForm
@@ -257,9 +250,8 @@ class RecipientDetailView(DetailView):
     template_name = 'messenger/recipient_detail.html'
 
 
-class RecipientDeleteView(DeleteView):
+class RecipientDeleteView(LoginRequiredMixin, DeleteView):
     """Удаление получателя"""
     model = Recipient
     template_name = 'messenger/recipient_delete.html'
     success_url = reverse_lazy('messenger:recipients_list')
-

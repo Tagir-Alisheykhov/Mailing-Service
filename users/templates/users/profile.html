@@ -1,0 +1,51 @@
+{% extends 'messenger/base.html' %}
+{% block content %}
+<div class="album py-5 bg-body-tertiary">
+    <div class="container">
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        <div class="col">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              {# Сообщение о подтверждении email #}
+              {% if show_confirmation_message %}
+                <div class="alert alert-success mb-3">
+                  Ваш email успешно подтвержден!
+                </div>
+              {% endif %}
+
+              {# Кнопка подтверждения (только если email не подтвержден) #}
+              {% if user.is_authenticated and not user.is_email_verified %}
+                <div class="btn-group mb-3">
+                  <form method="post" action="{% url 'users:verify_email' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Подтвердить почту</button>
+                  </form>
+                </div>
+              {% endif %}
+
+              {# Системные сообщения #}
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }} mt-2">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+
+              <p class="card-text">Имя: {{ object.first_name }}</p>
+              <p class="card-text">Фамилия: {{ object.last_name }}</p>
+              <p class="card-text">Почта: {{ object.email }}</p>
+              <p class="card-text">Телефон {{ object.phone_number }}</p>
+              <p class="card-text">Никнейм: {{ object.username }}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                  <a class="btn btn-info" href="{% url 'users:profile_edit' %}" role="button">Редактировать</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}

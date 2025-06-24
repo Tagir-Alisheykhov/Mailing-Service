@@ -1,0 +1,24 @@
+{% extends 'messenger/base.html' %}
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
+        <h2>{% if editing %}Редактирование профиля{% else %}Регистрация{% endif %}</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-warning">
+                {% if editing %}Сохранить изменения{% else %}Зарегистрироваться{% endif %}
+            </button>
+        </form>
+        {% if editing %}
+            <a class="btn btn-info mt-2" href="{% url 'users:profile' %}" role="button">Назад</a>
+        {% else %}
+            <a class="btn btn-info mt-2" href="{% url 'messenger:home' %}" role="button">Главная</a>
+        {% endif %}
+    </div>
+    <div class="col-2"></div>
+</div>
+{% endblock %}
