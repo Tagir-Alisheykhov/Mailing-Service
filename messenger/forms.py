@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.core.validators import EmailValidator, validate_email
+from django.core.validators import validate_email
 
 from .models import Message, Mailing, Recipient
 
@@ -19,6 +19,10 @@ FORBIDDEN_WORDS = [
 
 class MessageForm(forms.ModelForm):
     """Форма для ручного создания и обновления сообщения"""
+
+    class Meta:
+        model = Message
+        fields = ['topic', 'body', 'recipient_email', 'is_sent']
 
     def __init__(self, *args, **kwargs):
         super(MessageForm, self).__init__(*args, **kwargs)
@@ -47,51 +51,28 @@ class MessageForm(forms.ModelForm):
     def clean(self):
         """Делает поля обязательными"""
         cleaned_data = super().clean()
-        required_fields = ['topic', 'body', 'recipient_email']
-        for field in required_fields:
-            if not cleaned_data.get(field):
-                self.add_error(field, 'Обязательное поле.')
-        return cleaned_data
-
-    class Meta:
-        model = Message
-        fields = ['topic', 'body', 'recipient_email', 'is_sent']
+        # # >>
+        if cleaned_data.get('is_sent'):
+            required_fields = ['topic', 'body', 'recipient_email']
+            for field in required_fields:
+                if not cleaned_data.get(field):
+                    self.add_error(field, 'Это поле обязательно для отправки письма')
+        # <<
+        # required_fields = ['topic', 'body']
+        # for field in required_fields:
+        #     if not cleaned_data.get(field):
+        #         self.add_error(field, 'Обязательное поле.')
+        # return cleaned_data
 
 
 class MailingForm(forms.ModelForm):
     """Форма для создания и редактирования рассылок"""
 
-    def __init__(self, *args, **kwargs):
-        super(MailingForm, self).__init__(*args, **kwargs)
-
-        for field_name in self.fields:
-            self.fields[field_name].help_text = None
-            self.fields[field_name].widget.attrs.update({
-                'class': 'form-control',
-                'placeholder': f'Введите: {self.fields[field_name].label}'
-            })
-        self.fields['start_datetime'].widget = forms.DateTimeInput(attrs={
-            'type': 'datetime-local',
-            'class': 'form-control'
-        })
-        self.fields['end_datetime'].widget = forms.DateTimeInput(attrs={
-            'type': 'datetime-local',
-            'class': 'form-control'
-        })
-
-    def clean(self):
-        """
-        Валидация на то, чтобы время окончания
-        не было раньше времени начала
-        """
-        cleaned_data = super().clean()
-        start_datetime = cleaned_data.get('start_datetime')
-        end_datetime = cleaned_data.get('end_datetime')
-        if start_datetime and end_datetime and end_datetime < start_datetime:
-            raise ValidationError(
-                "Дата окончания рассылки не может быть раньше даты начала!"
-            )
-        return cleaned_data
+    create_new_message = forms.BooleanField(
+        required=False,
+        label='Создать новое сообщение',
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
 
     class Meta:
         model = Mailing
@@ -100,20 +81,85 @@ class MailingForm(forms.ModelForm):
             'end_datetime',
             'mailing_status',
             'message',
-            'recipients'
+            'recipients',
+            'create_new_message'
         ]
+        widgets = {
+            'start_datetime': forms.DateTimeInput(
+                attrs={'type': 'datetime-local', 'class': 'form-control'}
+            ),
+            'end_datetime': forms.DateTimeInput(
+                attrs={'type': 'datetime-local', 'class': 'form-control'}
+            ),
+            'message': forms.Select(
+                attrs={'class': 'form-select'}
+            ),
+            'recipients': forms.SelectMultiple(
+                attrs={'class': 'form-select', 'size': '5'}
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.message_form = kwargs.pop('message_form', None)
+        super().__init__(*args, **kwargs)
+        self.fields['message'].queryset = Message.objects.all()
+
+        if 'recipient_email' in self.fields:
+            del self.fields['recipient_email']
+        if self.message_form is None:
+            self.message_form = MessageForm(prefix='message')
+        for field in self.fields.values():
+            if field.widget.__class__ not in [forms.CheckboxInput]:
+                field.widget.attrs.update({'class': 'form-control'})
+
+    def clean(self):
+        cleaned_data = super().clean()
+        create_new = cleaned_data.get('create_new_message')
+        if create_new:
+            if 'message' in self._errors:
+                del self._errors['message']
+            self.message_form = MessageForm(
+                data=self.data,
+                prefix='message'
+            )
+            if not self.message_form.is_valid():
+                raise forms.ValidationError("Пожалуйста, исправьте ошибки в форме сообщения")
+        else:
+            if not cleaned_data.get('message'):
+                raise forms.ValidationError("Выберите сообщение или создайте новое")
+        return cleaned_data
+
+    def save(self, commit=True):
+        mailing = super().save(commit=False)
+        if self.cleaned_data.get('create_new_message'):
+            # Создание нового сообщения
+            message = self.message_form.save(commit=commit)
+            # message.creator = self.user # Если нужно сохранять создателя
+            mailing.message = message
+        if commit:
+            mailing.save()
+            self.save_m2m()  # ManyToMany (Recipients)
+        return mailing
+
+
+class MailingManagerForm(forms.ModelForm):
+    """Права доступа для менеджера на внесении изменений в рассылку"""
+    class Meta:
+        model = Mailing
+        fields = ['mailing_status']
 
 
 class RecipientForm(forms.ModelForm):
     """Форма для создания и редактирования получателей рассылок"""
 
-    # email = forms.EmailField(validators=[EmailValidator()])
+    class Meta:
+        model = Recipient
+        fields = ['email', 'fullname', 'comment']
 
     def __init__(self, *args, **kwargs):
         super(RecipientForm, self).__init__(*args, **kwargs)
 
         for field_name in self.fields:
-            self.fields[field_name].help_text = None
             self.fields[field_name].widget.attrs.update({
                 'class': 'form-control',
                 'placeholder': f'Введите: {self.fields[field_name].label}'
@@ -150,6 +196,3 @@ class RecipientForm(forms.ModelForm):
                 )
         return comment
 
-    class Meta:
-        model = Recipient
-        fields = ['email', 'fullname', 'comment']

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -7,7 +8,9 @@ class Recipient(models.Model):
     email = models.EmailField(
         unique=True,
         verbose_name='Почтовый адрес получателя',
-        help_text='Введите почтовый адрес получателя'
+        help_text='Введите почтовый адрес получателя',
+        blank=True,
+        null=True
     )
     fullname = models.CharField(
         verbose_name='ФИО получателя',
@@ -16,6 +19,14 @@ class Recipient(models.Model):
     comment = models.TextField(
         verbose_name='Комментарий',
         help_text='Введите комментарий',
+        null=True,
+        blank=True
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name='Создатель получателя',
+        on_delete=models.SET_NULL,
+        related_name='recipients',
         null=True,
         blank=True
     )
@@ -50,7 +61,17 @@ class Message(models.Model):
         null=True,
         blank=True
     )
-    is_sent = models.BooleanField(default=False)
+    is_sent = models.BooleanField(
+        default=False
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name='Создатель сообщения',
+        on_delete=models.SET_NULL,
+        related_name='messages',
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return self.topic
@@ -98,6 +119,14 @@ class Mailing(models.Model):
         Recipient,
         verbose_name='Получатель рассылки',
     )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name="Создатель рассылки",
+        on_delete=models.SET_NULL,
+        related_name='mailings',
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return f"Рассылка ({self.start_datetime} - {self.end_datetime})"
@@ -105,6 +134,10 @@ class Mailing(models.Model):
     class Meta:
         verbose_name = 'Рассылка'
         verbose_name_plural = 'Рассылки'
+        permissions = [
+            ('can_view_statistics', 'can view statistics'),
+            ('can_disable_mailing', 'can disable mailing')
+        ]
 
 
 class MailingAttempt(models.Model):

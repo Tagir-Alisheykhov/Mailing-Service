@@ -18,54 +18,89 @@
   <!-- Custom styles -->
 <!--  {% block styles %}-->
 <!--  {% endblock %}-->
+
 </head>
+  <style>
+    .dropdown-item-text {
+      white-space: nowrap;
+      max-width: 200px;
+      display: block;
+    }
+  </style>
 <body>
 
   <!-- Навигационная панель -->
 
-  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm px-3">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="{% url 'messenger:home' %}">OpusMail</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'messenger:home' %}">Главная</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'messenger:mailing_list' %}">Рассылки</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'messenger:recipients_list' %}">Получатели</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'messenger:draft_msg' %}">Сообщения</a>
-          </li>
-          {% if user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'users:profile' %}">Профиль</a>
-            </li>
-            <li class="nav-item">
-              <form method="post" action="{% url 'users:logout' %}" style="display: inline">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-link nav-link">Выйти</button>
-              </form>
-            </li>
-          {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'users:register' %}">Регистрация</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'users:login' %}">Войти</a>
-            </li>
-          {% endif %}
-        </ul>
-      </div>
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm px-3">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'messenger:home' %}">OpusMail</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+
+        <!-- Стандартные пункты меню -->
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'messenger:home' %}">Главная</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'messenger:mailing_list' %}">Рассылки</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'messenger:recipients_list' %}">Получатели</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'messenger:draft_msg' %}">Сообщения</a>
+        </li>
+
+        <!-- Вставляем наш универсальный пункт с иконкой пользователя -->
+        <li class="nav-item dropdown d-flex align-items-center">
+          <a class="nav-link p-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+              {% if user.is_authenticated and user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="Avatar" class="rounded-circle" style="width: 36px; height: 36px; object-fit: cover;">
+              {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 16 16" class="text-muted">
+                  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                  <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-7 7c0 2.381 1.266 4.486 3.105 5.75L7.99 13a2.5 2.5 0 0 1-2.49-2H3a7.002 7.002 0 0 1 5-6.928V6a2 2 0 0 0 2-2h-2V2h2a2 2 0 0 0 2-2v2h2a2 2 0 0 0-2 2V1a7 7 0 0 0-7-7z"/>
+                </svg>
+              {% endif %}
+            </div>
+          </a>
+
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+            {% if user.is_authenticated %}
+              <!-- Отображение username -->
+              <li>
+                <span class="dropdown-item-text text-truncate fw-bold" title="{{ user.username }}">
+                  {{ user.username }}
+                </span>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'users:profile' %}">Профиль</a></li>
+              {% if perms.messenger.can_disable_mailing %}
+                <li><a class="dropdown-item" href="{% url 'users:users_list' %}">Пользователи</a></li>
+              {% endif %}
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form method="post" action="{% url 'users:logout' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item">Выйти</button>
+                </form>
+              </li>
+            {% else %}
+              <li><a class="dropdown-item" href="{% url 'users:login' %}">Войти</a></li>
+              <li><a class="dropdown-item" href="{% url 'users:register' %}">Регистрация</a></li>
+            {% endif %}
+          </ul>
+        </li>
+        <!-- Конец универсального пункта -->
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>
 
 
 <div class="container-fluid px-4" style="{% if request.path == '/' or 'home' in request.path %}background: linear-gradient(135deg, #ffcccb 0%, #ffebee 100%){% else %}background: #ffffff{% endif %}">

@@ -26,7 +26,8 @@ class CustomUserCreationForm(UserCreationForm):
             'phone_number',
             'username',
             'password1',
-            'password2'
+            'password2',
+            'avatar'
         )
 
     def clean_phone_number(self):
@@ -45,11 +46,22 @@ class CustomUserChangeForm(UserChangeForm):
             'last_name',
             'email',
             'phone_number',
-            'username'
+            'username',
+            'avatar',
+            'is_active',
         )
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+
+        user_has_permission = False
+        if self.request and hasattr(self.request, 'user'):
+            user = self.request.user
+            user_has_permission = (user.is_superuser or
+                                 user.has_perm('messenger.can_disable_mailing'))
+        if not user_has_permission:
+            self.fields.pop('is_active', None)
 
         if 'password' in self.fields:
             del self.fields['password']
@@ -57,6 +69,5 @@ class CustomUserChangeForm(UserChangeForm):
         for field_name, field in self.fields.items():
             if hasattr(field, 'help_text') and field.help_text:
                 field.help_text = field.help_text.replace('../password/', '')
-
         assert 'password' not in self.fields, \
             "ОШИБКА: Поле пароля всё ещё присутствует в форме"

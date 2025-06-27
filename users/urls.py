@@ -9,11 +9,12 @@ from django.contrib.auth.views import (
 )
 
 from .views import (
+    UsersListView,
     RegisterView,
     ProfileDetailView,
     ProfileEditView,
     ProfileVerificationView,
-    email_verification
+    email_verification, UserEditView, UserDetailView,
 )
 from . import apps
 
@@ -31,9 +32,12 @@ urlpatterns = [
     ), name='login'),
     path('logout/', LogoutView.as_view(next_page='messenger:home'), name='logout'),
 
-    # User profile
+    # Users view
     path('profile/', ProfileDetailView.as_view(), name='profile'),
     path('profile/edit/', ProfileEditView.as_view(), name='profile_edit'),
+    path('user-<int:pk>/edit/', UserEditView.as_view(), name='user_edit'),
+    path('user-<int:pk>/detail/', UserDetailView.as_view(), name='user_detail'),
+    path('users-list/', UsersListView.as_view(), name='users_list'),
 
     # Email verification
     path('verify-email/', ProfileVerificationView.as_view(), name='verify_email'),

@@ -14,7 +14,7 @@
             </button>
         </form>
         {% if editing %}
-            <a class="btn btn-info mt-2" href="{% url 'users:profile' %}" role="button">Назад</a>
+            <a class="btn btn-info mt-2" href="{% if profile_ %}{% url 'users:profile' %}{% elif user_ %}{% url 'users:users_list' %}{% endif %}" role="button">Назад</a>
         {% else %}
             <a class="btn btn-info mt-2" href="{% url 'messenger:home' %}" role="button">Главная</a>
         {% endif %}

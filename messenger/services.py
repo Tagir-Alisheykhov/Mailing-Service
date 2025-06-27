@@ -6,7 +6,12 @@ from django.conf import settings
 from dotenv import load_dotenv
 from django.core.mail import send_mail
 
-from messenger.models import Mailing, MailingAttempt, Recipient
+from messenger.models import (
+    Mailing,
+    MailingAttempt,
+    Recipient,
+    Message
+)
 
 load_dotenv()
 
@@ -114,15 +119,60 @@ def get_mailing_from_cache():
         return mailings
 
 
-# def get_active_mailing_from_cache() -> list:
-#     """Получение кэшированных данных о рассылках"""
-#     if not settings.CACHE_ENABLED:
-#         return Mailing.objects.all()
-#     else:
-#         key = 'mailings'
-#         mailings = cache.get(key)
-#         if not mailings:
-#             mailings = Mailing.objects.all()
-#             cache.set(key, mailings, 10)
-#         return list(mailings)
+def get_message_from_cache(user=None):
+    """Получение кэшированных данных о сообщениях"""
+    if not settings.CACHE_ENABLED:
+        return Message.objects.all()
+    else:
+        key = 'messages'
+        messages = cache.get(key)
+        if not messages:
+            messages = Message.objects.all()
+            cache.set(key, messages, 10)
+        #     >>>>
+        if user and not user.is_superuser:
+            messages = messages.filter(owner=user)
+        #   <<<
+        return messages
 
+
+def get_mailings_attempt(user=None):
+    """Получение кэшированных данных о попытках рассылок"""
+    if not settings.CACHE_ENABLED:
+        return MailingAttempt.objects.all()
+    else:
+        key_1 = 'successfully'
+        key_2 = 'unsuccessfully'
+        successfully = cache.get(key_1)
+        unsuccessfully = cache.get(key_2)
+        if not successfully:
+            successfully = MailingAttempt.objects.filter(sending_status='successfully')
+            cache.set(key_1, successfully, 10)
+        if not unsuccessfully:
+            unsuccessfully = MailingAttempt.objects.filter(sending_status='unsuccessfully')
+            cache.set(key_2, unsuccessfully, 10)
+        #     >>>>
+        if user and not user.is_superuser:
+            successfully = successfully.filter(mailing__owner=user)
+            unsuccessfully = unsuccessfully.filter(mailing__owner=user)
+        #       <<<<
+        return successfully, unsuccessfully
+
+
+def create_msg_validation(object):
+    """Валидация при создании сообщения."""
+    if object.is_sent:
+        try:
+            result = sending_msg(
+                sender_email=SENDER,
+                recipient_email=[object.recipient_email],
+                subject=object.topic,
+                body=object.body
+            )
+            object.is_sent = result.get('status') == 'success'
+            object.save()
+        except Exception:
+            object.is_sent = False
+    else:
+        object.is_sent = False
+    object.save()

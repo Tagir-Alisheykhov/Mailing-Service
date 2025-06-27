@@ -7,10 +7,8 @@
   <p class="pt-3 px-2">Сервис Email рассылок</p>
   <div class="d-flex justify-content-between align-items-center px-2 pb-2 mb-3">
     <h1 class="h3">Главная</h1>
-    {% if user.is_authenticated %}
-      <p class="btn btn-secondary text-white">Никнейм: {{ user.username }}</p>
-    {% else %}
-      <a href="{% url 'users:login' %}" class="btn btn-outline-primary">Вход</a>
+    {% if not user.is_authenticated %}
+      <a href="{% url 'users:login' %}" class="btn btn-outline-warning">Вход</a>
     {% endif %}
   </div>
 
@@ -20,7 +18,7 @@
       <div class="card border-start border-light border-5 shadow-sm h-100">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title text-muted">Всего рассылок</h5>
-          <p class="card-text display-6 fw-bold mt-auto align-self-end">{{ total_campaigns }}</p>
+          <p class="card-text display-6 fw-bold mt-auto align-self-end">{% if user.is_authenticated %}{{ total_campaigns }}{% else %}---{% endif %}</p>
         </div>
         <a href="{% url 'messenger:mailing_list' %}" class="stretched-link"></a>
       </div>
@@ -31,7 +29,7 @@
       <div class="card border-start border-light border-5 shadow-sm h-100">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title text-muted">Активные рассылки</h5>
-          <p class="card-text display-6 fw-bold mt-auto align-self-end">{{ active_campaigns }}</p>
+          <p class="card-text display-6 fw-bold mt-auto align-self-end">{% if user.is_authenticated %}{{ active_campaigns }}{% else %}---{% endif %}</p>
         </div>
         <a href="{% url 'messenger:mailing_running' %}" class="stretched-link"></a>
       </div>
@@ -42,7 +40,7 @@
       <div class="card border-start border-light border-5 shadow-sm h-100">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title text-muted">Уникальных получателей</h5>
-          <p class="card-text display-6 fw-bold mt-auto align-self-end">{{ unique_recipients }}</p>
+          <p class="card-text display-6 fw-bold mt-auto align-self-end">{% if user.is_authenticated %}{{ unique_recipients }}{% else %}---{% endif %}</p>
         </div>
         <a href="{% url 'messenger:recipients_list' %}" class="stretched-link"></a>
       </div>
