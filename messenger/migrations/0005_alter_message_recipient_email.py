@@ -6,13 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('messenger', '0004_message_recipient_email'),
+        ("messenger", "0004_message_recipient_email"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='message',
-            name='recipient_email',
-            field=models.EmailField(blank=True, help_text='Введите почтовый адрес получателя', max_length=254, null=True, verbose_name='Почтовый адрес получателя'),
+            model_name="message",
+            name="recipient_email",
+            field=models.EmailField(
+                blank=True,
+                help_text="Введите почтовый адрес получателя",
+                max_length=254,
+                null=True,
+                verbose_name="Почтовый адрес получателя",
+            ),
         ),
     ]

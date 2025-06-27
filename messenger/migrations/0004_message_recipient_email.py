@@ -6,14 +6,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('messenger', '0003_message_is_sent'),
+        ("messenger", "0003_message_is_sent"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='message',
-            name='recipient_email',
-            field=models.EmailField(default='no-email@example.com', help_text='Введите почтовый адрес получателя', max_length=254, verbose_name='Почтовый адрес получателя'),
+            model_name="message",
+            name="recipient_email",
+            field=models.EmailField(
+                default="no-email@example.com",
+                help_text="Введите почтовый адрес получателя",
+                max_length=254,
+                verbose_name="Почтовый адрес получателя",
+            ),
             preserve_default=False,
         ),
     ]

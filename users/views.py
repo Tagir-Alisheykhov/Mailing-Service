@@ -23,9 +23,9 @@ load_dotenv()
 
 
 class RegisterView(CreateView):
-    template_name = 'users/form_user.html'
+    template_name = "users/form_user.html"
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy('users:login')
+    success_url = reverse_lazy("users:login")
     usable_password = None
 
     def form_valid(self, form):
@@ -36,48 +36,51 @@ class RegisterView(CreateView):
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
     """Профиль пользователя"""
+
     model = CustomUser
-    template_name = 'users/profile.html'
-    context_object_name = 'object'
+    template_name = "users/profile.html"
+    context_object_name = "object"
 
     def get_object(self, queryset=None):
         return self.request.user
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.session.pop('email_just_verified', False):
-            context['show_confirmation_message'] = True
+        if self.request.session.pop("email_just_verified", False):
+            context["show_confirmation_message"] = True
         return context
 
 
 class ProfileEditView(LoginRequiredMixin, UpdateView):
     """Обновление данных пользователя"""
+
     model = CustomUser
     form_class = CustomUserChangeForm
-    template_name = 'users/form_user.html'
-    success_url = reverse_lazy('users:profile')
+    template_name = "users/form_user.html"
+    success_url = reverse_lazy("users:profile")
     usable_password = None
-    context_object_name = 'profile_'
+    context_object_name = "profile_"
 
     def get_object(self, queryset=None):
         return self.request.user
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['editing'] = True
+        context["editing"] = True
         return context
 
 
 class ProfileVerificationView(LoginRequiredMixin, View):
     """Верификация пользователя"""
+
     model = CustomUser
-    success_url = reverse_lazy('users:profile')
+    success_url = reverse_lazy("users:profile")
 
     def post(self, request, *args, **kwargs):
         """Отправка письма с подтверждением"""
         user = request.user
         if user.is_email_verified:
-            messages.info(request, 'Ваш email уже подтвержден!')
+            messages.info(request, "Ваш email уже подтвержден!")
             return redirect(self.success_url)
         else:
             token = secrets.token_hex(16)
@@ -86,13 +89,15 @@ class ProfileVerificationView(LoginRequiredMixin, View):
             host = request.get_host()
             url = f'http://{host}{reverse("users:email_verification", kwargs={"token": token})}'
             send_mail(
-                subject='Подтверждение почты',
-                message=f'Для подтверждения email перейдите по ссылке: {url}',
-                from_email=os.getenv('EMAIL_HOST_USER'),
+                subject="Подтверждение почты",
+                message=f"Для подтверждения email перейдите по ссылке: {url}",
+                from_email=os.getenv("EMAIL_HOST_USER"),
                 recipient_list=[user.email],
                 fail_silently=False,
             )
-            messages.success(request, 'Ссылка для подтверждения отправлена на ваш email!')
+            messages.success(
+                request, "Ссылка для подтверждения отправлена на ваш email!"
+            )
             return redirect(self.success_url)
 
 
@@ -102,26 +107,25 @@ def email_verification(request, token):
     user.is_email_verified = True
     user.token = None
     user.save()
-    request.session['email_just_verified'] = True
+    request.session["email_just_verified"] = True
     login(request, user)
 
     # messages.success(request, 'Ваш email успешно подтвержден!')
-    return redirect(reverse('users:profile'))
+    return redirect(reverse("users:profile"))
 
 
-@method_decorator(cache_page(15), name='dispatch')
+@method_decorator(cache_page(15), name="dispatch")
 class UsersListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = CustomUser
-    template_name = 'users/users_list.html'
-    context_object_name = 'users_list'
-    permission_required = [
-        'messenger.can_disable_mailing'
-    ]
+    template_name = "users/users_list.html"
+    context_object_name = "users_list"
+    permission_required = ["messenger.can_disable_mailing"]
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        if (self.request.user.is_superuser or
-            self.request.user.has_perm('messenger.can_disable_mailing')):
+        if self.request.user.is_superuser or self.request.user.has_perm(
+            "messenger.can_disable_mailing"
+        ):
             return super().get_queryset()
         return queryset.none()
 
@@ -129,44 +133,43 @@ class UsersListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         """Обработка случая, когда нет прав"""
         if self.request.user.is_authenticated:
             from django.core.exceptions import PermissionDenied
+
             raise PermissionDenied("У вас нет прав для просмотра списка пользователей")
         return super().handle_no_permission()
 
 
 class UserEditView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     """Обновление данных пользователя из списка пользователей"""
+
     model = CustomUser
     form_class = CustomUserChangeForm
-    template_name = 'users/form_user.html'
-    success_url = reverse_lazy('users:users_list')
+    template_name = "users/form_user.html"
+    success_url = reverse_lazy("users:users_list")
     usable_password = None
-    context_object_name = 'user_'
-    permission_required = [
-        'messenger.can_disable_mailing'
-    ]
+    context_object_name = "user_"
+    permission_required = ["messenger.can_disable_mailing"]
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
+        kwargs["request"] = self.request
         return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['editing'] = True
+        context["editing"] = True
         return context
 
 
 class UserDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     """Профиль пользователя"""
+
     model = CustomUser
-    template_name = 'users/profile.html'
-    context_object_name = 'user_detail_view'
-    permission_required = [
-        'messenger.can_disable_mailing'
-    ]
+    template_name = "users/profile.html"
+    context_object_name = "user_detail_view"
+    permission_required = ["messenger.can_disable_mailing"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.session.pop('email_just_verified', False):
-            context['show_confirmation_message'] = True
+        if self.request.session.pop("email_just_verified", False):
+            context["show_confirmation_message"] = True
         return context
