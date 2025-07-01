@@ -1,0 +1,49 @@
+{% extends 'messenger/base.html' %}
+{% load static %}
+
+{% block title %}
+    Список пользователей
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <p class="pt-3 px-2">Зарегистрированные пользователи</p>
+  <div class="d-flex justify-content-between align-items-center px-2 pb-2">
+    <h1 class="h3">Пользователи</h1>
+  </div>
+
+  <hr class="my-4">
+
+  {% if users_list %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ФИО</th>
+            <th>Почта</th>
+            <th>Статус</th>
+            <th class="text-end">Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users_list %}
+            <tr>
+              <td>{{ user.first_name }} {{ user.last_name }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.is_active }}</td>
+              <td class="text-end">
+                <div class="btn-group btn-group-sm" role="group">
+                  <a href="{% url 'users:user_detail' pk=user.pk %}" class="btn btn-outline-dark">Посмотреть</a>
+                  <a href="{% url 'users:user_edit' pk=user.pk %}" class="btn btn-outline-dark">Изменить</a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">Пользователи отсутствуют</div>
+  {% endif %}
+</div>
+{% endblock %}

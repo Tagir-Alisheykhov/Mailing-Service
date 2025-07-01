@@ -1,0 +1,120 @@
+{% extends 'messenger/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if object %}Редактирование рассылки{% else %}Создание рассылки{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <h2 class="mb-4">{{ view.title }}</h2>
+
+      <form method="post" id="mailing-form">
+        {% csrf_token %}
+
+        <!-- Основные параметры -->
+        <div class="card mb-4 bg-info">
+          <div class="card-header bg-white fw-bold">Основные параметры</div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                {{ form.start_datetime.label_tag }}
+                {{ form.start_datetime }}
+                {{ form.start_datetime.errors }}
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.end_datetime.label_tag }}
+                {{ form.end_datetime }}
+                {{ form.end_datetime.errors }}
+              </div>
+            </div>
+            <div class="mb-3">
+              {{ form.mailing_status.label_tag }}
+              {{ form.mailing_status }}
+              {{ form.mailing_status.errors }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Получатели -->
+        <div class="card mb-4 bg-info">
+          <div class="card-header bg-white fw-bold">Получатели</div>
+          <div class="card-body">
+            {{ form.recipients.label_tag }}
+            {{ form.recipients }}
+            {{ form.recipients.errors }}
+          </div>
+        </div>
+
+        <!-- Сообщение -->
+        <div class="card mb-4 bg-info">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Сообщение</span>
+            <div class="form-check form-switch">
+              {{ form.create_new_message }}
+              <label class="form-check-label" for="{{ form.create_new_message.id_for_label }}">
+                Создать новое
+              </label>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Выбор существующего сообщения -->
+            <div id="existing-message" {% if form.create_new_message.value %}style="display: none;"{% endif %}>
+              {{ form.message.label_tag }}
+              {{ form.message }}
+              {{ form.message.errors }}
+            </div>
+
+            <!-- Форма нового сообщения -->
+            <div id="new-message-fields" {% if not form.create_new_message.value %}style="display: none;"{% endif %}>
+              {{ message_form.non_field_errors }}
+
+              <div class="mb-3">
+                {{ message_form.topic.label_tag }}
+                {{ message_form.topic }}
+                {{ message_form.topic.errors }}
+              </div>
+
+              <div class="mb-3">
+                {{ message_form.body.label_tag }}
+                {{ message_form.body }}
+                {{ message_form.body.errors }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Кнопки -->
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            {% if current_url_name == 'mailing_create' %}
+              Создать рассылку
+            {% else %}
+              Изменить
+            {% endif %}
+          </button>
+          <a href="{% url 'messenger:mailing_list' %}" class="btn btn-dark">Отмена</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('{{ form.create_new_message.id_for_label }}').addEventListener('change', function() {
+    const existing = document.getElementById('existing-message');
+    const newFields = document.getElementById('new-message-fields');
+
+    if (this.checked) {
+      existing.style.display = 'none';
+      newFields.style.display = 'block';
+    } else {
+      existing.style.display = 'block';
+      newFields.style.display = 'none';
+    }
+  });
+</script>
+{% endblock %}
